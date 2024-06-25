@@ -42,7 +42,7 @@ To use the C-List library in your project, include the `c_list.h` header file:
 
 ### Use the macros
 
-Then you can Define a list for your specific data type using the `ListDec` and `ListDef` macros:
+Then you can define a list for your specific data type using the `ListDec` and `ListDef` macros:
 
 ```c
 ListDec(type, list_name)
