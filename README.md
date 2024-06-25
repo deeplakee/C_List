@@ -1,7 +1,17 @@
-# C_List
+# C_List: A Generic List Library for C
 
-a simple list implement for C<br>
-provide function below
+C-List is a generic list library for C, providing dynamic array functionality with a set of utility functions for managing lists of any data type.
+
+## Features
+
+- Dynamic array resizing
+- Push and pop operations
+- Element access and modification
+- Find, insert, and remove operations
+- List concatenation
+- Clear and free functions
+
+##### The functions below are available.
 
 ```C
 void init(list_name *list);
@@ -19,3 +29,23 @@ bool insert(list_name *list, int index, type Element);
 bool remove_at(list_name *list, int index);
 void remove(list_name *list, type Element);
 ```
+
+## Usage
+
+### Including the Library
+
+To use the C-List library in your project, include the `c_list.h` header file:
+
+```c
+#include "c_list.h"
+```
+
+### Use the macros
+
+Then you can Define a list for your specific data type using the `ListDec` and `ListDef` macros:
+
+```c
+ListDec(type, list_name)
+ListDef(type, list_name)
+```
+
