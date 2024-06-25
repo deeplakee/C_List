@@ -1,6 +1,6 @@
 # C_List: A Generic List Library for C
 
-C-List is a generic list library for C, providing dynamic array functionality with a set of utility functions for managing lists of any data type.
+C_List is a generic list library for C, providing dynamic array functionality with a set of utility functions for managing lists of any data type.
 
 ## Features
 
