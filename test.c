@@ -1,4 +1,4 @@
-#include "list.h"
+#include "c_list.h"
 #include<stdio.h>
 
 ListDec(int, intList)
