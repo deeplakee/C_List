@@ -20,7 +20,7 @@ type pop(list_name *list);
 type *get(list_name *list, int index);
 bool set(list_name *list, int index, type Element);
 int find(list_name *list, type Element);
-void free_##(list_name *list);
+void free(list_name *list);
 int size_of(list_name *list);
 bool is_empty(list_name *list);
 void clear(list_name *list);
