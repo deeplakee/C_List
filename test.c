@@ -4,6 +4,9 @@
 ListDec(int, intList)
 ListDef(int, intList)
 
+void print_int(int value) {
+    printf("%d", value);
+}
 int main(int argc, char const *argv[])
 {
 
@@ -34,6 +37,8 @@ int main(int argc, char const *argv[])
         //test get
         printf("%d\n", *get_intList(&a, i));
     }
+    //test print
+    print_intList(&a,print_int);
 
     //test find
     printf("index of 2 in a:%d\n",find_intList(&a,2));
