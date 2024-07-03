@@ -17,6 +17,7 @@ C_List is a generic list library for C, providing dynamic array functionality wi
 void init(list_name *list);
 void push(list_name *list, type Element);
 type pop(list_name *list);
+type back(list_name *list);
 type *get(list_name *list, int index);
 bool set(list_name *list, int index, type Element);
 int find(list_name *list, type Element);
@@ -28,6 +29,7 @@ list_name* extend(list_name *list_a, list_name *list_b);
 bool insert(list_name *list, int index, type Element);
 bool remove_at(list_name *list, int index);
 void remove(list_name *list, type Element);
+void print(list_name *list, void (*printElement)(type));
 ```
 
 ## Usage
