@@ -167,6 +167,12 @@ void *reallocate(void *pointer, size_t oldSize, size_t newSize) {
             list->data[i] = list->data[i + 1];                                                 \
         }                                                                                      \
         list->count--;                                                                         \
+        if (list->count<list->capacity/3)                                                      \
+        {                                                                                      \
+            int oldCapacity = list->capacity;                                                  \
+            list->capacity=DECREASE_CAPACITY(oldCapacity);                                     \
+            list->data = CHANGE_ARRAY(type, list->data, oldCapacity, list->capacity);          \
+        }                                                                                      \
         return true;                                                                           \
     }                                                                                          \
                                                                                                \

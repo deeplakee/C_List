@@ -59,5 +59,25 @@ int main(int argc, char const *argv[])
     free_intList(&a);
     printf("size of a:%d\n", size_of_intList(&a));
 
+    //test decrease when remove
+    intList list;
+    init_intList(&list);
+    for (int i = 1; i <= 100; i++)
+    {
+        push_intList(&list, i);
+    }
+
+    printf("%d\n", list.capacity);
+
+    for (int i = 100; i > 20; i--)
+    {
+        remove_intList(&list, i);
+    }
+    
+    printf("%d\n", list.capacity);
+    print_intList(&list, print_int);
+
+    free_intList(&list);
+
     return 0;
 }
