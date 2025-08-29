@@ -10,7 +10,8 @@ A lightweight **generic dynamic array implementation in C**, inspired by C++’s
 - Generic, type-safe dynamic arrays (via macros)
 - Automatic growth and shrink
 - Error handling system with per-list and global error codes
-- Common operations: push, pop, insert, remove, extend, clear, find
+- Common operations: push, pop, insert, remove, extend, clear, find, replace, sublist
+- Interoperability with raw C arrays (`from_array`, `to_array`)
 - Easy to print using custom callbacks
 - Header-only (just include and use)
 
@@ -97,9 +98,8 @@ you get the following functions (examples with `MyList`):
 
 - **Creation / Destruction**
   - `MyList *create_MyList();`
+  - `MyList *from_array_MyList(T *arr, size_t len);`
   - `void destroy_MyList(MyList *list);`
-  - `void init_MyList(MyList *list);`
-  - `void free_MyList(MyList *list);`
 - **Capacity / Size**
   - `int size_MyList(MyList *list);`
   - `int capacity_MyList(MyList *list);`
@@ -116,11 +116,54 @@ you get the following functions (examples with `MyList`):
   - `bool insert_MyList(MyList *list, size_t index, T element);`
   - `bool remove_at_MyList(MyList *list, size_t index);`
   - `void remove_MyList(MyList *list, T element);`
+  - `void replace_MyList(MyList *list, T oldElement, T newElement);`
   - `void clear_MyList(MyList *list);`
   - `MyList *extend_MyList(MyList *a, MyList *b);`
 - **Utility**
+  - `void init_MyList(MyList *list);`
+  - `void free_MyList(MyList *list);`
+  - `T *to_array_MyList(MyList *list);`
   - `int find_MyList(MyList *list, T element);`
   - `void print_MyList(MyList *list, void (*printElement)(T));`
+  - `MyList *sublist_MyList(MyList *list, size_t start, size_t end);`
+
+------
+
+## ⚠️ Error Handling
+
+C-List uses error codes to report problems.
+There are two ways to check errors:
+
+1. **Global errors** (from last operation):
+
+   ```c
+   List_errno err = get_list_errno();
+   const char *msg = list_errno_str(err);
+   ```
+   or 
+   ```c
+   const char *msg = clean_list_errno();
+   ```
+
+2. **Per-list errors** (specific list):
+
+   ```c
+   List_errno err = get_errno_MyList(list);
+   const char *msg = list_errno_str(err);
+   ```
+
+### Error Codes
+
+| Code                     | Value | Meaning                                                    |
+| ------------------------ | ----- | ---------------------------------------------------------- |
+| `LIST_OK`                | `0`   | No error                                                   |
+| `LIST_NOT_EXIST`         | `1`   | List pointer is `NULL`                                     |
+| `LIST_EMPTY`             | `2`   | List is empty                                              |
+| `LIST_OUT_OF_RANGE`      | `3`   | Index out of bounds                                        |
+| `LIST_ALLOCATION_FAILED` | `4`   | Memory allocation failed                                   |
+| `LIST_INVALID_PRINTFN`   | `5`   | Invalid print callback function                            |
+| `LIST_INVALID_CAPACITY`  | `6`   | Invalid capacity (e.g., negative or zero when not allowed) |
+| `LIST_INVALID_RAW_ARRAY` | `7`   | Invalid input raw array (e.g., `NULL` or invalid length)   |
 
 ------
 

@@ -12,7 +12,6 @@ void print_int(int value) {
 }
 
 int main(int argc, char const *argv[]) {
-
     IntList *a = create_IntList();
 
     //test push
@@ -117,9 +116,35 @@ int main(int argc, char const *argv[]) {
     print_IntList(c, print_int);
     printf("end test\n\n");
 
+    // test from_array
+    printf("test from_array\n");
+    int raw_list[] = {1, 45, 0, 343, -1, 1023, -1};
+    IntList *d = from_array_IntList(raw_list, sizeof(raw_list) / sizeof(raw_list[0]));
+    printf("raw list is :[1,45,0,343,-1,1023,-1]\n");
+    printf("list d (from raw list) is: ");
+    print_IntList(d, print_int);
+    printf("end test\n\n");
+
+    // test replace
+    printf("test replace\n");
+    printf("list d: [1,45,0,343,-1,1023,-1]\n");
+    replace_IntList(d, -1, -111);
+    printf("list d (after replace -1 to -111) is: ");
+    print_IntList(d, print_int);
+    printf("end test\n\n");
+
+    // test sublist
+    printf("test replace\n");
+    printf("list d: [1,45,0,343,-111,1023,-1111]\n");
+    IntList *e = sublist_IntList(d,1,4);
+    printf("e(sublist 1,4 from d): ");
+    print_IntList(e, print_int);
+    printf("end test\n\n");
+
     destroy_IntList(a);
     destroy_IntList(b);
     destroy_IntList(c);
-
+    destroy_IntList(d);
+    destroy_IntList(e);
     return 0;
 }

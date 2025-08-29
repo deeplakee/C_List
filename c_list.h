@@ -54,6 +54,7 @@ typedef enum {
     LIST_ALLOCATION_FAILED,
     LIST_INVALID_PRINTFN,
     LIST_INVALID_CAPACITY,
+    LIST_INVALID_RAW_ARRAY,
 } List_errno;
 
 extern List_errno global_list_errno;
@@ -124,7 +125,11 @@ static inline const char *clean_list_errno() {
     bool insert_##list_name(list_name *list, size_t index, type Element);                   \
     bool remove_at_##list_name(list_name *list, size_t index);                              \
     void remove_##list_name(list_name *list, type Element);                                 \
-    void print_##list_name(list_name *list, void (*printElement)(type));
+    list_name *sublist_##list_name(list_name *list, size_t start, size_t end);              \
+    void replace_##list_name(list_name *list, type oldElement, type newElement);            \
+    void print_##list_name(list_name *list, void (*printElement)(type));                    \
+    list_name *from_array_##list_name(type *arr, size_t len);                               \
+    type *to_array_##list_name(list_name *list);
 
 
 #define ListDef(type, list_name)                                                               \
@@ -135,7 +140,7 @@ static inline const char *clean_list_errno() {
         }                                                                                      \
         List_errno errno = list->err;                                                          \
         list->err = LIST_OK;                                                                   \
-        global_list_errno = LIST_OK;                                                           \
+        set_list_errno(LIST_OK);                                                               \
         return errno;                                                                          \
 }                                                                                              \
                                                                                                \
@@ -401,11 +406,17 @@ static inline const char *clean_list_errno() {
             set_list_errno(LIST_NOT_EXIST);                                                    \
             return;                                                                            \
         }                                                                                      \
-        int index = find_##list_name(list, Element);                                           \
-        while (index != -1)                                                                    \
-        {                                                                                      \
-            remove_at_##list_name(list, index);                                                \
-            index = find_##list_name(list, Element);                                           \
+        int offset = 0;                                                                        \
+        for (int i = 0; i < list->count; i++) {                                                \
+            if (list->data[i] == Element) {                                                    \
+                offset++;                                                                      \
+            } else {                                                                           \
+            list->data[i - offset] = list->data[i];                                            \
+            }                                                                                  \
+        }                                                                                      \
+        list->count -= offset;                                                                 \
+        if (list->count * 4 < list->capacity) {                                                \
+            shrink_##list_name(list);                                                          \
         }                                                                                      \
         set_errno_##list_name(list, LIST_OK);                                                  \
     }                                                                                          \
@@ -429,5 +440,85 @@ static inline const char *clean_list_errno() {
         }                                                                                      \
         printf("]\n");                                                                         \
         set_errno_##list_name(list, LIST_OK);                                                  \
+    }                                                                                          \
+                                                                                               \
+    list_name *sublist_##list_name(list_name *list, size_t start, size_t end) {                \
+        if (list == NULL) {                                                                    \
+            set_list_errno(LIST_NOT_EXIST);                                                    \
+            return NULL;                                                                       \
+        }                                                                                      \
+        if (start > end || end > (size_t)list->count) {                                        \
+            set_errno_##list_name(list, LIST_OUT_OF_RANGE);                                    \
+            return NULL;                                                                       \
+        }                                                                                      \
+        size_t new_count = end - start;                                                        \
+        list_name *newlist = create_##list_name();                                             \
+        if (newlist == NULL) {                                                                 \
+            set_errno_##list_name(list, LIST_ALLOCATION_FAILED);                               \
+            return NULL;                                                                       \
+        }                                                                                      \
+        if (!resize_##list_name(newlist, next_power_of_2(new_count))) {                        \
+            destroy_##list_name(newlist);                                                      \
+            set_errno_##list_name(list, LIST_ALLOCATION_FAILED);                               \
+            return NULL;                                                                       \
+        }                                                                                      \
+        memcpy(newlist->data, list->data + start, sizeof(type) * new_count);                   \
+        newlist->count = new_count;                                                            \
+        set_errno_##list_name(list, LIST_OK);                                                  \
+        return newlist;                                                                        \
+       }                                                                                       \
+                                                                                               \
+    void replace_##list_name(list_name *list, type oldElement, type newElement) {              \
+        if (list == NULL) {                                                                    \
+            set_list_errno(LIST_NOT_EXIST);                                                    \
+            return;                                                                            \
+        }                                                                                      \
+        for (int i = 0; i < list->count; i++) {                                                \
+            if (list->data[i] == oldElement) {                                                 \
+                list->data[i] = newElement;                                                    \
+            }                                                                                  \
+        }                                                                                      \
+        set_errno_##list_name(list, LIST_OK);                                                  \
+    }                                                                                          \
+                                                                                               \
+    list_name *from_array_##list_name(type *arr, size_t len) {                                 \
+        if (arr == NULL && len > 0) {                                                          \
+            set_list_errno(LIST_INVALID_RAW_ARRAY);                                            \
+            return NULL;                                                                       \
+        }                                                                                      \
+        list_name *newlist = create_##list_name();                                             \
+        if (newlist == NULL) {                                                                 \
+            set_list_errno(LIST_ALLOCATION_FAILED);                                            \
+            return NULL;                                                                       \
+        }                                                                                      \
+        int capacity = next_power_of_2(len);                                                   \
+        if (!resize_##list_name(newlist, capacity)) {                                          \
+            destroy_##list_name(newlist);                                                      \
+            set_list_errno(LIST_ALLOCATION_FAILED);                                            \
+            return NULL;                                                                       \
+        }                                                                                      \
+        memcpy(newlist->data, arr, sizeof(type) * len);                                        \
+        newlist->count = (int)len;                                                             \
+        set_errno_##list_name(newlist, LIST_OK);                                               \
+        return newlist;                                                                        \
+    }                                                                                          \
+                                                                                               \
+    type *to_array_##list_name(list_name *list) {                                              \
+        if (list == NULL) {                                                                    \
+            set_list_errno(LIST_NOT_EXIST);                                                    \
+            return NULL;                                                                       \
+        }                                                                                      \
+        if (list->count == 0) {                                                                \
+            set_errno_##list_name(list, LIST_EMPTY);                                           \
+            return NULL;                                                                       \
+        }                                                                                      \
+        type *arr = (type *)malloc(sizeof(type) * list->count);                                \
+        if (arr == NULL) {                                                                     \
+            set_errno_##list_name(list, LIST_ALLOCATION_FAILED);                               \
+            return NULL;                                                                       \
+        }                                                                                      \
+        memcpy(arr, list->data, sizeof(type) * list->count);                                   \
+        set_errno_##list_name(list, LIST_OK);                                                  \
+        return arr;                                                                            \
     }
 #endif //C_LIST_H
